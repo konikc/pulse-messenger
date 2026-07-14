@@ -12,6 +12,7 @@
     "windows": [
       {
         "title": "Pulse",
+        "url": "https://pulse-messenger-10imd7c7p-shelperapp-7107s-projects.vercel.app",
         "width": 1180,
         "height": 780,
         "minWidth": 820,
@@ -25,8 +26,12 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["msi", "nsis"],
+    "targets": "all",
+    "publisher": "Pulse Messenger",
     "shortDescription": "Мягкий и быстрый мессенджер Pulse",
-    "category": "SocialNetworking"
+    "longDescription": "Pulse — современный мессенджер с чатами, реакциями, файлами и аудио- и видеозвонками.",
+    "category": "SocialNetworking",
+    "homepage": "https://github.com/konikc/pulse-messenger",
+    "copyright": "Copyright © 2026 Pulse Messenger"
   }
 }

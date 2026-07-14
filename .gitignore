@@ -9,6 +9,11 @@ __v0_jsx-dev-runtime.ts
 # Environment variables
 .env*.local
 
+# Android signing
+*.jks
+*.keystore
+android/key.properties
+
 # Common ignores
 node_modules
 .next/
