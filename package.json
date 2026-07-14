@@ -6,12 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build"
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
     "@capacitor/core": "^8.4.2",
     "@livekit/components-react": "^2.9.23",
+    "@livekit/components-styles": "^1.2.0",
     "@neondatabase/auth": "0.4.2-beta",
     "@tauri-apps/api": "^2.11.1",
     "@vercel/analytics": "1.6.1",
