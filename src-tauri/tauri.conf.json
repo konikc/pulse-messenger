@@ -12,6 +12,7 @@
     "windows": [
       {
         "title": "Pulse",
+        "url": "https://pulse-messenger.vercel.app",
         "width": 1180,
         "height": 780,
         "minWidth": 820,
@@ -25,7 +26,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["msi", "nsis"],
+    "targets": "all",
     "shortDescription": "Мягкий и быстрый мессенджер Pulse",
     "category": "SocialNetworking"
   }

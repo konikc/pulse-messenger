@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 export const revalidate = 900
 
 export async function GET() {
-  const owner = process.env.GITHUB_OWNER
-  const repo = process.env.GITHUB_REPO
+  const owner = process.env.GITHUB_OWNER ?? 'konikc'
+  const repo = process.env.GITHUB_REPO ?? 'pulse-messenger'
   const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.1.0'
 
   if (!owner || !repo) {
