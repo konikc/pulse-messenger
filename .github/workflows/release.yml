@@ -1,3 +1,10 @@
+Основная проблема решена: в задании `publish` действительно отсутствовал шаг клонирования репозитория (`actions/checkout`). Без него утилита `gh` не может прочитать историю коммитов для генерации списка изменений (`--generate-notes`).
+
+Для исправления я добавил шаг `actions/checkout` с параметром `fetch-depth: 0` в самое начало задания `publish`. Это гарантирует, что GitHub CLI получит доступ ко всей истории коммитов и тегов для правильного создания пре-релиза.
+
+Вот исправленный и готовый к использованию YAML-конфиг:
+
+```yaml
 name: Native release
 
 on:
@@ -132,6 +139,11 @@ jobs:
     needs: [android, desktop]
     runs-on: ubuntu-latest
     steps:
+      # --- ИСПРАВЛЕНИЕ: Клонируем репозиторий со всей историей для генерации заметок релиза ---
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - uses: actions/download-artifact@v4
         with:
           path: release-assets
