@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || env.RELEASE_TAG }}
       - uses: pnpm/action-setup@v4
         with:
           version: 10
@@ -39,21 +39,52 @@ jobs:
           java-version: '21'
           cache: gradle
       - run: pnpm install --frozen-lockfile
-      - name: Restore Android signing key
+      - name: Prepare Android signing key
+        id: signing
+        shell: bash
         env:
           KEYSTORE_BASE64: ${{ secrets.PULSE_ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.PULSE_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.PULSE_ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.PULSE_ANDROID_KEY_PASSWORD }}
         run: |
-          test -n "$KEYSTORE_BASE64"
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/pulse-release.p12"
+          if [[ -n "$KEYSTORE_BASE64" && -n "$KEYSTORE_PASSWORD" && -n "$KEY_ALIAS" && -n "$KEY_PASSWORD" ]]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/pulse-release.p12"
+            echo "password=$KEYSTORE_PASSWORD" >> "$GITHUB_OUTPUT"
+            echo "alias=$KEY_ALIAS" >> "$GITHUB_OUTPUT"
+            echo "key_password=$KEY_PASSWORD" >> "$GITHUB_OUTPUT"
+            echo "generated=false" >> "$GITHUB_OUTPUT"
+          else
+            GENERATED_PASSWORD="$(openssl rand -hex 24)"
+            keytool -genkeypair -v -storetype PKCS12 \
+              -keystore "$RUNNER_TEMP/pulse-release.p12" \
+              -alias pulse -keyalg RSA -keysize 4096 -validity 10000 \
+              -storepass "$GENERATED_PASSWORD" -keypass "$GENERATED_PASSWORD" \
+              -dname "CN=Pulse Messenger, O=Pulse, C=US"
+            echo "password=$GENERATED_PASSWORD" >> "$GITHUB_OUTPUT"
+            echo "alias=pulse" >> "$GITHUB_OUTPUT"
+            echo "key_password=$GENERATED_PASSWORD" >> "$GITHUB_OUTPUT"
+            echo "generated=true" >> "$GITHUB_OUTPUT"
+            mkdir -p "$RUNNER_TEMP/signing-backup"
+            cp "$RUNNER_TEMP/pulse-release.p12" "$RUNNER_TEMP/signing-backup/pulse-release.p12"
+            printf 'alias=pulse\nstore_password=%s\nkey_password=%s\n' "$GENERATED_PASSWORD" "$GENERATED_PASSWORD" > "$RUNNER_TEMP/signing-backup/credentials.txt"
+          fi
+      - name: Save generated signing backup
+        if: steps.signing.outputs.generated == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-android-signing-backup
+          path: ${{ runner.temp }}/signing-backup
+          retention-days: 90
       - name: Sync Capacitor project
         run: pnpm android:sync
       - name: Build signed APK
         working-directory: android
         env:
           PULSE_ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/pulse-release.p12
-          PULSE_ANDROID_KEYSTORE_PASSWORD: ${{ secrets.PULSE_ANDROID_KEYSTORE_PASSWORD }}
-          PULSE_ANDROID_KEY_ALIAS: ${{ secrets.PULSE_ANDROID_KEY_ALIAS }}
-          PULSE_ANDROID_KEY_PASSWORD: ${{ secrets.PULSE_ANDROID_KEY_PASSWORD }}
+          PULSE_ANDROID_KEYSTORE_PASSWORD: ${{ steps.signing.outputs.password }}
+          PULSE_ANDROID_KEY_ALIAS: ${{ steps.signing.outputs.alias }}
+          PULSE_ANDROID_KEY_PASSWORD: ${{ steps.signing.outputs.key_password }}
         run: ./gradlew assembleRelease --no-daemon
       - name: Prepare APK
         run: cp android/app/build/outputs/apk/release/app-release.apk "Pulse-Messenger-${RELEASE_TAG}-Android.apk"
@@ -81,7 +112,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ env.RELEASE_TAG }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || env.RELEASE_TAG }}
       - uses: pnpm/action-setup@v4
         with:
           version: 10
