@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { and, desc, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '@/lib/db'
-import { conversationMembers, conversations, messages, profiles } from '@/lib/db/schema'
+import { conversationMembers, conversations, profiles } from '@/lib/db/schema'
 import { requireUserId } from '@/lib/auth/require-user'
 
 const createSchema = z.object({ username: z.string().trim().toLowerCase().regex(/^[a-z0-9_]{3,24}$/) })

@@ -42,9 +42,17 @@ export function AuthForm() {
   async function signInWithGoogle() {
     setPending(true)
     setError('')
-    const result = await authClient.signIn.social({ provider: 'google', callbackURL: '/' })
-    if (result.error) {
-      setError(result.error.message || 'Google-вход сейчас недоступен')
+
+    try {
+      const callbackURL = new URL('/', window.location.origin).toString()
+      const result = await authClient.signIn.social({ provider: 'google', callbackURL })
+
+      if (result.error) {
+        setError(result.error.message || 'Google-вход сейчас недоступен')
+        setPending(false)
+      }
+    } catch {
+      setError('Не удалось открыть Google-вход. Проверьте подключение и попробуйте снова.')
       setPending(false)
     }
   }
