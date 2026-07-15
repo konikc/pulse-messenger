@@ -1,4 +1,10 @@
-# pulse-messenger
+# Pulse Messenger
+
+Pulse is a cross-platform messenger for [Web](https://pulse-messenger.vercel.app), Android, Windows, and Linux, built with Next.js, Capacitor, and Tauri.
+
+Production native clients load the stable `https://pulse-messenger.vercel.app` alias. For local Android development, override it explicitly, for example `PULSE_APP_URL=http://10.0.2.2:3000 pnpm android:sync`; Tauri development continues to use `http://localhost:3000` through `devUrl`.
+
+Windows release builds use the GUI subsystem and therefore open without a Command Prompt window. Debug builds intentionally keep the console available for diagnostics.
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
 
