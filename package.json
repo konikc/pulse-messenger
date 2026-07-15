@@ -1,5 +1,5 @@
 {
-  "name": "my-project",
+  "name": "pulse-messenger",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -46,6 +46,8 @@
     "@types/pg": "^8.20.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.10",
     "postcss": "^8.5",
     "tailwindcss": "^4.2.0",
     "typescript": "5.7.3"

@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server'
 export const revalidate = 900
 
 export async function GET() {
-  const owner = process.env.GITHUB_OWNER
-  const repo = process.env.GITHUB_REPO
+  const owner = process.env.GITHUB_OWNER ?? 'konikc'
+  const repo = process.env.GITHUB_REPO ?? 'pulse-messenger'
   const currentVersion = process.env.NEXT_PUBLIC_APP_VERSION ?? '0.1.0'
 
   if (!owner || !repo) {
@@ -23,7 +23,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Не удалось проверить обновления' }, { status: 502 })
   }
 
-  const release = (await response.json()) as { tag_name: string; name?: string; html_url: string; body?: string; published_at?: string }
+  const release = (await response.json()) as { tag_name: string; name?: string; html_url: string; body?: string; published_at?: string; assets?: Array<{ name: string; browser_download_url: string }> }
   const normalize = (value: string) => value.trim().replace(/^v/, '')
   const parts = (value: string) => normalize(value).split('.').map((part) => Number.parseInt(part, 10) || 0)
   const compare = (left: string, right: string) => {
@@ -42,6 +42,7 @@ export async function GET() {
     updateAvailable: compare(release.tag_name, currentVersion),
     name: release.name ?? release.tag_name,
     url: release.html_url,
+    assets: (release.assets ?? []).map((asset) => ({ name: asset.name, url: asset.browser_download_url })),
     notes: release.body?.slice(0, 500) ?? '',
     publishedAt: release.published_at,
   })

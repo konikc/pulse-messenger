@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { and, asc, eq, gt } from 'drizzle-orm'
+import { and, asc, eq, gt, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { conversationMembers, conversations, messages } from '@/lib/db/schema'
@@ -25,7 +25,30 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (!(await isMember(id, userId))) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     const after = new URL(request.url).searchParams.get('after')
     const where = after ? and(eq(messages.conversationId, id), gt(messages.createdAt, new Date(after))) : eq(messages.conversationId, id)
-    const rows = await db.select().from(messages).where(where).orderBy(asc(messages.createdAt)).limit(100)
+    const rows = await db.select({
+      id: messages.id,
+      conversationId: messages.conversationId,
+      senderId: messages.senderId,
+      kind: messages.kind,
+      body: messages.body,
+      encryptedPayload: messages.encryptedPayload,
+      replyToId: messages.replyToId,
+      expiresAt: messages.expiresAt,
+      createdAt: messages.createdAt,
+      editedAt: messages.editedAt,
+      reactions: sql<Array<{ reaction: string; count: number; reacted: boolean }>>`
+        coalesce((
+          select json_agg(reaction_summary)
+          from (
+            select reaction, count(*)::int as count,
+              bool_or(user_id = ${userId}) as reacted
+            from message_reactions
+            where message_id = ${messages.id}
+            group by reaction
+          ) reaction_summary
+        ), '[]'::json)
+      `,
+    }).from(messages).where(where).orderBy(asc(messages.createdAt)).limit(100)
     return NextResponse.json({ messages: rows, currentUserId: userId })
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
