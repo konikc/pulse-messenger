@@ -12,6 +12,7 @@
     "windows": [
       {
         "title": "Pulse",
+        "url": "https://pulse-messenger-chi.vercel.app",
         "width": 1180,
         "height": 780,
         "minWidth": 820,

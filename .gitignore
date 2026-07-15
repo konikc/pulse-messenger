@@ -8,6 +8,9 @@ __v0_jsx-dev-runtime.ts
 
 # Environment variables
 .env*.local
+*.keystore
+*.jks
+*.p12
 
 # Common ignores
 node_modules

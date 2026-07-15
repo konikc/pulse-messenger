@@ -1,6 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
-const appUrl = process.env.PULSE_APP_URL ?? 'http://localhost:3000'
+const appUrl =
+  process.env.PULSE_APP_URL ?? 'https://pulse-messenger-chi.vercel.app'
 
 const config: CapacitorConfig = {
   appId: 'app.pulse.messenger',

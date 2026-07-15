@@ -1,6 +1,7 @@
 {
-  "name": "my-project",
+  "name": "pulse-messenger",
   "version": "0.1.0",
+  "description": "Pulse — быстрый кроссплатформенный мессенджер",
   "private": true,
   "scripts": {
     "dev": "next dev",
