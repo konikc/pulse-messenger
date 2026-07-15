@@ -68,7 +68,14 @@ jobs:
           PULSE_KEY_PASSWORD: ${{ secrets.PULSE_KEY_PASSWORD }}
         run: ./gradlew assembleRelease
       - name: Name APK
-        run: cp android/app/build/outputs/apk/release/app-release.apk "Pulse-Android-v${RELEASE_VERSION}.apk"
+        shell: bash
+        run: |
+          APK_PATH="$(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' -print -quit)"
+          if [ -z "$APK_PATH" ]; then
+            echo "No release APK was produced" >&2
+            exit 1
+          fi
+          cp "$APK_PATH" "Pulse-Android-v${RELEASE_VERSION}.apk"
       - uses: actions/upload-artifact@v4
         with:
           name: pulse-android
