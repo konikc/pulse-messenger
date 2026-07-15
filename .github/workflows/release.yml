@@ -136,13 +136,36 @@ jobs:
         with:
           path: release-assets
           merge-multiple: true
+      - name: Flatten release assets
+        shell: bash
+        run: |
+          shopt -s globstar nullglob
+          for file in release-assets/**/*; do
+            [ -f "$file" ] || continue
+            destination="release-assets/$(basename "$file")"
+            if [ "$file" = "$destination" ]; then
+              continue
+            fi
+            if [ -e "$destination" ]; then
+              echo "Duplicate release asset: $(basename "$file")" >&2
+              exit 1
+            fi
+            mv "$file" "$destination"
+          done
+          find release-assets -mindepth 1 -type d -empty -delete
       - name: Generate checksums
         working-directory: release-assets
-        run: sha256sum * > SHA256SUMS.txt
+        shell: bash
+        run: |
+          find . -maxdepth 1 -type f ! -name 'SHA256SUMS.txt' -print0 \
+            | sort -z \
+            | xargs -0 -r sha256sum -- \
+            | sed 's#  \./#  #' > SHA256SUMS.txt
+          test -s SHA256SUMS.txt
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
           gh release view "$RELEASE_TAG" >/dev/null 2>&1 || gh release create "$RELEASE_TAG" --title "Pulse $RELEASE_TAG" --generate-notes --prerelease
-          gh release upload "$RELEASE_TAG" release-assets/* --clobber
+          find release-assets -maxdepth 1 -type f -print0 | xargs -0 -r gh release upload "$RELEASE_TAG" --clobber --
