@@ -110,7 +110,8 @@ jobs:
           generate_release_notes: true
           prerelease: true
           files: |
-            artifacts/*.exe
-            artifacts/*.AppImage
-            artifacts/*.deb
-            artifacts/*.apk
+            artifacts/**/*.exe
+            artifacts/**/*.AppImage
+            artifacts/**/*.deb
+            artifacts/**/*.apk
+          overwrite_files: true
