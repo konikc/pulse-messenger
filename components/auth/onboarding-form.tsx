@@ -1,6 +1,7 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { LoaderCircle } from 'lucide-react'
 import { completeOnboarding, type OnboardingState } from '@/app/onboarding/actions'
 import { PulseLogo } from '@/components/pulse-logo'
@@ -12,7 +13,16 @@ import { Input } from '@/components/ui/input'
 const initialState: OnboardingState = {}
 
 export function OnboardingForm({ defaultName }: { defaultName: string }) {
+  const router = useRouter()
   const [state, action, pending] = useActionState(completeOnboarding, initialState)
+
+  useEffect(() => {
+    if (state.success) {
+      window.location.assign('/')
+    } else if (state.requiresSignIn) {
+      router.replace('/auth/sign-in')
+    }
+  }, [router, state.requiresSignIn, state.success])
 
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background p-4">
