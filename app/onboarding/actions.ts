@@ -4,7 +4,6 @@ import { auth } from '@/lib/auth/server'
 import { db } from '@/lib/db'
 import { profiles } from '@/lib/db/schema'
 import { z } from 'zod'
-import { redirect } from 'next/navigation'
 
 const profileSchema = z.object({
   username: z.string().trim().toLowerCase().regex(/^[a-z0-9_]{3,24}$/, 'От 3 до 24 латинских букв, цифр или _'),
@@ -12,11 +11,16 @@ const profileSchema = z.object({
   avatarEmoji: z.string().trim().max(8).default(''),
 })
 
-export type OnboardingState = { error?: string; field?: 'username' | 'displayName' }
+export type OnboardingState = {
+  error?: string
+  field?: 'username' | 'displayName'
+  success?: boolean
+  requiresSignIn?: boolean
+}
 
 export async function completeOnboarding(_state: OnboardingState, formData: FormData): Promise<OnboardingState> {
   const { data: session } = await auth.getSession()
-  if (!session?.user) redirect('/auth/sign-in')
+  if (!session?.user) return { error: 'Сессия истекла. Войдите снова.', requiresSignIn: true }
 
   const parsed = profileSchema.safeParse({
     username: formData.get('username'),
@@ -33,12 +37,26 @@ export async function completeOnboarding(_state: OnboardingState, formData: Form
       avatarEmoji: parsed.data.avatarEmoji || null,
     }).onConflictDoUpdate({
       target: profiles.userId,
-      set: { displayName: parsed.data.displayName, avatarEmoji: parsed.data.avatarEmoji || null, updatedAt: new Date() },
+      set: {
+        username: parsed.data.username,
+        displayName: parsed.data.displayName,
+        avatarEmoji: parsed.data.avatarEmoji || null,
+        updatedAt: new Date(),
+      },
     })
   } catch (error) {
-    if (error instanceof Error && error.message.includes('profiles_username_unique_ci')) return { error: 'Этот username уже занят', field: 'username' }
+    const databaseError = error as {
+      code?: string
+      constraint?: string
+      cause?: { code?: string; constraint?: string }
+    }
+    const code = databaseError.code ?? databaseError.cause?.code
+    const constraint = databaseError.constraint ?? databaseError.cause?.constraint
+    if (code === '23505' && constraint === 'profiles_username_unique') {
+      return { error: 'Этот username уже занят', field: 'username' }
+    }
     return { error: 'Не удалось сохранить профиль. Попробуйте ещё раз.' }
   }
 
-  redirect('/')
+  return { success: true }
 }
