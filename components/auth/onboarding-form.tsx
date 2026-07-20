@@ -18,7 +18,8 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
 
   useEffect(() => {
     if (state.success) {
-      window.location.assign('/')
+      router.push('/')
+      router.refresh()
     } else if (state.requiresSignIn) {
       router.replace('/auth/sign-in')
     }
@@ -41,3 +42,4 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
     </main>
   )
 }
+
