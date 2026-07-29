@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@/lib/auth/server'
+import { getAuth } from '@/lib/auth/server'
 import { db } from '@/lib/db'
 import { profiles } from '@/lib/db/schema'
 import { z } from 'zod'
@@ -19,7 +19,7 @@ export type OnboardingState = {
 }
 
 export async function completeOnboarding(_state: OnboardingState, formData: FormData): Promise<OnboardingState> {
-  const { data: session } = await auth.getSession()
+  const { data: session } = await getAuth().getSession()
   if (!session?.user) return { error: 'Сессия истекла. Войдите снова.', requiresSignIn: true }
 
   const parsed = profileSchema.safeParse({

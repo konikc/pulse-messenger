@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { PulseLogo } from '@/components/pulse-logo'
-import { UpdateStatus } from '@/components/messenger/update-status'
+import { InstallApp } from '@/components/messenger/install-app'
 import { CallRoom } from '@/components/messenger/call-room'
 import { cn } from '@/lib/utils'
 
@@ -129,6 +129,7 @@ export function PulseApp() {
           {newChatOpen && <div className="mx-3 mb-3 rounded-2xl border bg-background p-3"><label className="text-xs font-medium" htmlFor="new-username">Новый чат по username</label><div className="mt-2 flex gap-2"><input id="new-username" value={username} onChange={(event) => setUsername(event.target.value.toLowerCase())} placeholder="username" className="min-w-0 flex-1 rounded-xl border bg-card px-3 text-sm outline-none focus:ring-2 focus:ring-ring" /><Button size="sm" onClick={createChat}>Найти</Button></div>{status && <p role="alert" className="mt-2 text-xs text-destructive">{status}</p>}</div>}
           <div className="px-4 pb-3"><label className="flex h-10 items-center gap-2 rounded-xl bg-muted px-3 focus-within:ring-2 focus-within:ring-ring"><Search className="size-4 text-muted-foreground" aria-hidden="true" /><span className="sr-only">Поиск чатов</span><input value={query} onChange={(event) => setQuery(event.target.value)} className="min-w-0 flex-1 bg-transparent text-sm outline-none" placeholder="Поиск" /></label></div>
           <Tabs defaultValue="all" className="px-4"><TabsList className="w-full"><TabsTrigger value="all" className="flex-1">Все</TabsTrigger><TabsTrigger value="direct" className="flex-1">Личные</TabsTrigger><TabsTrigger value="groups" className="flex-1">Группы</TabsTrigger></TabsList></Tabs>
+          <div className="px-3 pt-3 xl:hidden"><InstallApp /></div>
           <div className="mt-2 flex h-[calc(100%-160px)] flex-col overflow-y-auto px-2 pb-4">
             {isLoading && <p className="p-4 text-sm text-muted-foreground">Загружаем чаты…</p>}
             {error && <p role="alert" className="p-4 text-sm text-destructive">Не удалось загрузить чаты.</p>}
@@ -145,7 +146,7 @@ export function PulseApp() {
           </> : <div className="flex flex-1 items-center justify-center p-6"><div className="max-w-sm text-center"><div className="mx-auto flex size-16 items-center justify-center rounded-3xl bg-accent"><MessageCircle className="size-7 text-primary" /></div><h2 className="mt-4 text-xl font-semibold">Ваш Pulse начинается здесь</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">Создайте первый чат по username. Сообщения синхронизируются между вашими устройствами.</p></div></div>}
         </section>
 
-        <aside className="hidden w-[284px] shrink-0 flex-col border-l bg-card xl:flex"><div className="flex h-[72px] items-center px-5"><h2 className="font-semibold">О чате</h2></div><div className="flex flex-col items-center px-5 py-5 text-center"><Avatar className="size-20"><AvatarFallback className="text-xl">{initials(activeConversation?.title ?? null)}</AvatarFallback></Avatar><h3 className="mt-3 text-lg font-semibold">{activeConversation?.title || 'Pulse'}</h3><p className="text-sm text-muted-foreground">{activeConversation?.kind === 'direct' ? 'Личный чат' : 'Сообщество'}</p><div className="mt-5 flex gap-2"><IconButton label="Уведомления"><Bell /></IconButton><IconButton label="Безопасность"><ShieldCheck /></IconButton></div></div><Separator /><div className="p-4 text-sm leading-relaxed text-muted-foreground">Участники чата видят только доступные им сообщения. Сервер проверяет членство при каждом запросе.</div><div className="mt-auto p-4"><UpdateStatus /></div></aside>
+        <aside className="hidden w-[284px] shrink-0 flex-col border-l bg-card xl:flex"><div className="flex h-[72px] items-center px-5"><h2 className="font-semibold">О чате</h2></div><div className="flex flex-col items-center px-5 py-5 text-center"><Avatar className="size-20"><AvatarFallback className="text-xl">{initials(activeConversation?.title ?? null)}</AvatarFallback></Avatar><h3 className="mt-3 text-lg font-semibold">{activeConversation?.title || 'Pulse'}</h3><p className="text-sm text-muted-foreground">{activeConversation?.kind === 'direct' ? 'Личный чат' : 'Сообщество'}</p><div className="mt-5 flex gap-2"><IconButton label="Уведомления"><Bell /></IconButton><IconButton label="Безопаснос��ь"><ShieldCheck /></IconButton></div></div><Separator /><div className="p-4 text-sm leading-relaxed text-muted-foreground">Участники чата видят только доступные им сообщения. Сервер проверяет членство при каждом запросе.</div><div className="mt-auto p-4"><InstallApp /></div></aside>
       </section>
       {callMode && selectedId && <CallRoom conversationId={selectedId} video={callMode === 'video'} onClose={() => setCallMode(null)} />}
     </main>

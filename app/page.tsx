@@ -1,5 +1,5 @@
 import { PulseApp } from '@/components/messenger/pulse-app'
-import { auth } from '@/lib/auth/server'
+import { getAuth } from '@/lib/auth/server'
 import { db } from '@/lib/db'
 import { profiles } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
@@ -8,7 +8,7 @@ import { redirect } from 'next/navigation'
 export const dynamic = 'force-dynamic'
 
 export default async function Page() {
-  const { data: session } = await auth.getSession()
+  const { data: session } = await getAuth().getSession()
   if (!session?.user) redirect('/auth/sign-in')
 
   const profile = await db.query.profiles.findFirst({
