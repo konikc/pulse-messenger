@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, LogIn, LoaderCircle } from 'lucide-react'
 import { PulseLogo } from '@/components/pulse-logo'
+import { InstallPwa } from '@/components/pwa/install-pwa'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
@@ -58,7 +59,7 @@ export function AuthForm() {
   }
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-background p-4">
+    <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-background p-4">
       <section className="flex w-full max-w-md flex-col gap-6 rounded-[2rem] border bg-card p-6 shadow-xl shadow-foreground/5 sm:p-8" aria-labelledby="auth-title">
         <div className="flex flex-col items-center gap-3 text-center">
           <PulseLogo className="size-14" />
@@ -93,6 +94,8 @@ export function AuthForm() {
           {mode === 'sign-in' ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
         </Button>
       </section>
+
+      <InstallPwa />
     </main>
   )
 }

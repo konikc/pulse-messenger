@@ -2,7 +2,7 @@ import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Manrope } from 'next/font/google'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { InstallPwa } from '@/components/pwa/install-pwa'
+import { ServiceWorkerRegister } from '@/components/pwa/sw-register'
 import './globals.css'
 
 const manrope = Manrope({ subsets: ['cyrillic', 'latin'], variable: '--font-manrope' })
@@ -31,7 +31,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="ru" className="bg-background">
       <body className={`${manrope.variable} font-sans antialiased`}>
         <TooltipProvider>{children}</TooltipProvider>
-        <InstallPwa />
+        <ServiceWorkerRegister />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
