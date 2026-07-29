@@ -62,19 +62,46 @@ jobs:
         run: |
           test "$(node -p "require('./package.json').version")" = "$RELEASE_VERSION"
           test "$(node -p "require('./src-tauri/tauri.conf.json').version")" = "$RELEASE_VERSION"
-      - name: Restore signing key
+      - name: Prepare signing key
+        shell: bash
         env:
           PULSE_KEYSTORE_BASE64: ${{ secrets.PULSE_KEYSTORE_BASE64 }}
-        run: echo "$PULSE_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/pulse-release.jks"
+          SECRET_KEYSTORE_PASSWORD: ${{ secrets.PULSE_KEYSTORE_PASSWORD }}
+          SECRET_KEY_ALIAS: ${{ secrets.PULSE_KEY_ALIAS }}
+          SECRET_KEY_PASSWORD: ${{ secrets.PULSE_KEY_PASSWORD }}
+        run: |
+          KEYSTORE_PATH="$RUNNER_TEMP/pulse-release.jks"
+          if [ -n "$PULSE_KEYSTORE_BASE64" ]; then
+            echo "Using keystore provided via repository secrets"
+            echo "$PULSE_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+            STORE_PASS="$SECRET_KEYSTORE_PASSWORD"
+            KEY_ALIAS="$SECRET_KEY_ALIAS"
+            KEY_PASS="${SECRET_KEY_PASSWORD:-$SECRET_KEYSTORE_PASSWORD}"
+          else
+            echo "No keystore secret found; generating an ad-hoc release keystore"
+            STORE_PASS="pulse-release"
+            KEY_ALIAS="pulse"
+            KEY_PASS="pulse-release"
+            keytool -genkeypair -v \
+              -keystore "$KEYSTORE_PATH" \
+              -storepass "$STORE_PASS" \
+              -keypass "$KEY_PASS" \
+              -alias "$KEY_ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=Pulse Messenger, OU=Pulse, O=Pulse, L=NA, ST=NA, C=NA"
+          fi
+          echo "::add-mask::$STORE_PASS"
+          echo "::add-mask::$KEY_PASS"
+          {
+            echo "PULSE_KEYSTORE_PATH=$KEYSTORE_PATH"
+            echo "PULSE_KEYSTORE_PASSWORD=$STORE_PASS"
+            echo "PULSE_KEY_ALIAS=$KEY_ALIAS"
+            echo "PULSE_KEY_PASSWORD=$KEY_PASS"
+          } >> "$GITHUB_ENV"
       - name: Sync Capacitor
         run: pnpm exec cap sync android
       - name: Build signed APK
         working-directory: android
-        env:
-          PULSE_KEYSTORE_PATH: ${{ runner.temp }}/pulse-release.jks
-          PULSE_KEYSTORE_PASSWORD: ${{ secrets.PULSE_KEYSTORE_PASSWORD }}
-          PULSE_KEY_ALIAS: ${{ secrets.PULSE_KEY_ALIAS }}
-          PULSE_KEY_PASSWORD: ${{ secrets.PULSE_KEY_PASSWORD }}
         run: ./gradlew assembleRelease
       - name: Name APK
         shell: bash
