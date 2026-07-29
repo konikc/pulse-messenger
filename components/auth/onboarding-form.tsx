@@ -28,7 +28,13 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-background p-4">
       <section className="flex w-full max-w-lg flex-col gap-6 rounded-[2rem] border bg-card p-6 shadow-xl shadow-foreground/5 sm:p-8" aria-labelledby="onboarding-title">
-        <div className="flex items-center gap-4"><PulseLogo className="size-12" /><div><p className="text-sm font-medium text-primary">Последний шаг</p><h1 id="onboarding-title" className="text-balance text-2xl font-semibold">Создайте профиль Pulse</h1></div></div>
+        <div className="flex items-center gap-4">
+          <PulseLogo className="size-12 shrink-0" />
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium leading-none text-primary">Последний шаг</p>
+            <h1 id="onboarding-title" className="text-balance text-2xl font-semibold leading-tight">Создайте профиль Pulse</h1>
+          </div>
+        </div>
         <form action={action}>
           <FieldGroup>
             <Field><FieldLabel htmlFor="avatarEmoji">Emoji-аватар</FieldLabel><Input id="avatarEmoji" name="avatarEmoji" defaultValue="👋" maxLength={8} className="text-2xl" /><FieldDescription>Позже можно загрузить фотографию в настройках.</FieldDescription></Field>

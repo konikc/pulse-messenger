@@ -30,6 +30,34 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Развёртывание на Beget (VPS)
+
+1. **Node.js 22+** и **PostgreSQL** (можно Neon или локальный) должны быть установлены.
+2. Задайте переменные окружения (файл `.env.production` или панель Beget):
+
+   ```bash
+   DATABASE_URL=postgres://user:pass@host:5432/pulse
+   NEON_AUTH_BASE_URL=https://<ваш-проект>.neon.tech
+   NEON_AUTH_COOKIE_SECRET=<openssl rand -base64 32>
+   PULSE_APP_URL=https://ваш-домен
+   ```
+
+3. Один раз создайте таблицы:
+
+   ```bash
+   psql "$DATABASE_URL" -f lib/db/schema.sql
+   ```
+
+4. Соберите и запустите:
+
+   ```bash
+   pnpm install --frozen-lockfile
+   pnpm build
+   pnpm start   # слушает порт 3000, проксируйте через nginx
+   ```
+
+5. Настройте systemd/PM2 для автозапуска и nginx как reverse-proxy на порт 3000.
+
 ## Learn More
 
 To learn more, take a look at the following resources:
