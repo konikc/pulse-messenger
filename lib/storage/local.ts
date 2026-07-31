@@ -5,7 +5,11 @@ import path from 'node:path'
 // Self-hosted media storage on the local filesystem (no Vercel Blob).
 // Configure a persistent directory on your VPS via UPLOAD_DIR.
 // Defaults to <project>/data/uploads for local/dev use.
-const UPLOAD_DIR = process.env.UPLOAD_DIR || path.join(process.cwd(), 'data', 'uploads')
+function resolveUploadDir() {
+  if (process.env.UPLOAD_DIR) return process.env.UPLOAD_DIR
+  return path.join(/* turbopackIgnore: true */ process.cwd(), 'data', 'uploads')
+}
+const UPLOAD_DIR = resolveUploadDir()
 
 function resolveSafePath(pathname: string) {
   // Prevent path traversal — only allow the "pulse/..." namespace.
