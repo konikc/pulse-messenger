@@ -6,19 +6,21 @@ import path from 'node:path'
 // Configure a persistent directory on your VPS via UPLOAD_DIR.
 // Defaults to <project>/data/uploads for local/dev use.
 function resolveUploadDir() {
+  // Resolved lazily (per request) so the build tracer never walks the whole
+  // project from a module-eval process.cwd() call.
   if (process.env.UPLOAD_DIR) return process.env.UPLOAD_DIR
-  return path.join(/* turbopackIgnore: true */ process.cwd(), 'data', 'uploads')
+  return path.join(process.cwd(), 'data', 'uploads')
 }
-const UPLOAD_DIR = resolveUploadDir()
 
 function resolveSafePath(pathname: string) {
+  const uploadDir = resolveUploadDir()
   // Prevent path traversal — only allow the "pulse/..." namespace.
   const normalized = path.normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, '')
   if (!normalized.startsWith('pulse/') && !normalized.startsWith('pulse\\')) {
     throw new Error('Invalid storage path')
   }
-  const full = path.join(UPLOAD_DIR, normalized)
-  if (!full.startsWith(path.resolve(UPLOAD_DIR))) throw new Error('Invalid storage path')
+  const full = path.join(uploadDir, normalized)
+  if (!full.startsWith(path.resolve(uploadDir))) throw new Error('Invalid storage path')
   return full
 }
 
