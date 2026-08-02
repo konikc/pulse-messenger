@@ -1,6 +1,13 @@
 import { auth } from '@/lib/auth/server'
 
-const handlers = auth.handler()
+// Build the handlers lazily on first request so `next build`'s page-data
+// collection never triggers auth initialization (which requires secrets).
+type AuthHandlers = ReturnType<typeof auth.handler>
+let handlers: AuthHandlers | null = null
+function getHandlers(): AuthHandlers {
+  if (!handlers) handlers = auth.handler()
+  return handlers
+}
 
 // The canonical origin the upstream Neon Auth project trusts.
 // In the v0 preview the app runs inside a cross-site iframe, so the browser
@@ -47,9 +54,9 @@ function withNormalizedOrigin(request: Request): Request {
 type RouteContext = { params: Promise<{ path: string[] }> }
 
 export async function GET(request: Request, context: RouteContext) {
-  return handlers.GET(withNormalizedOrigin(request), context)
+  return getHandlers().GET(withNormalizedOrigin(request), context)
 }
 
 export async function POST(request: Request, context: RouteContext) {
-  return handlers.POST(withNormalizedOrigin(request), context)
+  return getHandlers().POST(withNormalizedOrigin(request), context)
 }
