@@ -1,39 +1,55 @@
 # Pulse Messenger
 
-Pulse is a cross-platform messenger for [Web](https://pulse-messenger.vercel.app), Android, Windows, and Linux, built with Next.js, Capacitor, and Tauri.
+Pulse is a self-hosted, cross-platform messenger for Web ([pulsemsg.ru](https://pulsemsg.ru)),
+Android, Windows, and Linux, built with Next.js 16, Capacitor, and Tauri.
 
-Production native clients load the stable `https://pulse-messenger.vercel.app` alias. For local Android development, override it explicitly, for example `PULSE_APP_URL=http://10.0.2.2:3000 pnpm android:sync`; Tauri development continues to use `http://localhost:3000` through `devUrl`.
+The app is designed to run on your own server (VPS). Production native clients load the stable
+`https://pulsemsg.ru` URL. For local Android development, override it explicitly, e.g.
+`PULSE_APP_URL=http://10.0.2.2:3000 pnpm android:sync`; Tauri development uses
+`http://localhost:3000` through `devUrl`.
 
-Windows release builds use the GUI subsystem and therefore open without a Command Prompt window. Debug builds intentionally keep the console available for diagnostics.
+Windows release builds use the GUI subsystem and open without a Command Prompt window.
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+## Tech stack
 
-## Built with v0
+- **Framework:** Next.js 16 (App Router), React 19, Tailwind CSS v4
+- **Auth:** Neon Auth (`@neondatabase/auth`) — email/password + Google OAuth
+- **Database:** Neon Postgres + Drizzle ORM
+- **Calls:** LiveKit
+- **Media storage:** local filesystem (`lib/storage/local.ts`, configurable via `UPLOAD_DIR`)
+- **Native:** Capacitor (Android) + Tauri (Windows/Linux desktop)
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
-
-[Continue working on v0 →](https://v0.app/chat/projects/prj_qP6slcSxKorbTzppXjGHMIBeT6v0)
-
-## Getting Started
-
-First, run the development server:
+## Getting started (local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+cp .env.native.example .env.local   # then fill in the real values
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Required environment variables
 
-## Learn More
+See `.env.native.example` and `DEPLOY.md`. The critical ones:
 
-To learn more, take a look at the following resources:
+| Variable | Purpose |
+| --- | --- |
+| `NEON_AUTH_BASE_URL` | Neon Auth server URL |
+| `NEON_AUTH_COOKIE_SECRET` | Session cookie secret, **32+ chars** (`openssl rand -base64 32`) |
+| `DATABASE_URL` / `DATABASE_URL_UNPOOLED` | Neon Postgres connection strings |
+| `NEXT_PUBLIC_APP_URL` | Public site URL, e.g. `https://pulsemsg.ru` |
+| `UPLOAD_DIR` | Directory for uploaded media on the server |
+| `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | Voice/video calls |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+## Production build
+
+```bash
+pnpm build
+pnpm start   # serves on port 3000 by default
+```
+
+## Deployment
+
+Full step-by-step instructions for a Beget VPS (Node.js + pm2 + nginx + Let's Encrypt) are in
+[`DEPLOY.md`](./DEPLOY.md).
