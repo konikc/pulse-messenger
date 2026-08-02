@@ -1,4 +1,3 @@
-import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Manrope } from 'next/font/google'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -32,7 +31,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${manrope.variable} font-sans antialiased`}>
         <TooltipProvider>{children}</TooltipProvider>
         <ServiceWorkerRegister />
-        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   )
