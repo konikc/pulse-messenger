@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowRight, LogIn, LoaderCircle } from 'lucide-react'
 import { PulseLogo } from '@/components/pulse-logo'
-import { InstallPwa } from '@/components/pwa/install-pwa'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { authClient } from '@/lib/auth/client'
+import { InstallPrompt } from '@/components/pwa/install-prompt'
 
 export function AuthForm() {
   const router = useRouter()
@@ -49,9 +49,14 @@ export function AuthForm() {
       const result = await authClient.signIn.social({ provider: 'google', callbackURL })
 
       if (result.error) {
-        setError(result.error.message || 'Google-вход сейчас недоступен')
+        setError(result.error.message || 'Google-вход сейчас недоступен. Проверьте, что провайдер Google включён в Neon Auth.')
         setPending(false)
+        return
       }
+
+      // Some client builds return the OAuth URL instead of auto-redirecting.
+      const redirectUrl = (result as { data?: { url?: string } }).data?.url
+      if (redirectUrl) window.location.href = redirectUrl
     } catch {
       setError('Не удалось открыть Google-вход. Проверьте подключение и попробуйте снова.')
       setPending(false)
@@ -59,7 +64,7 @@ export function AuthForm() {
   }
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center gap-5 bg-background p-4">
+    <main className="flex min-h-dvh items-center justify-center bg-background p-4">
       <section className="flex w-full max-w-md flex-col gap-6 rounded-[2rem] border bg-card p-6 shadow-xl shadow-foreground/5 sm:p-8" aria-labelledby="auth-title">
         <div className="flex flex-col items-center gap-3 text-center">
           <PulseLogo className="size-14" />
@@ -93,9 +98,9 @@ export function AuthForm() {
         <Button type="button" variant="ghost" onClick={() => { setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in'); setError('') }}>
           {mode === 'sign-in' ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
         </Button>
-      </section>
 
-      <InstallPwa />
+        <InstallPrompt />
+      </section>
     </main>
   )
 }
